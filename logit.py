@@ -30,17 +30,23 @@ def getlogdata(password=""):
     upload = traffic.get("NewTodayUpload")
     download = traffic.get("NewTodayDownload")
 
-    # If the previous value is less than the current value, subtract it
-    # Otherwise it is probably either a new log run so don't subtract or
-    # It is a new day, for now we will just not subtract
+    # If the previous value is less than the current value, subtract it.  Otherwise it is either
+    # - a new log run so don't subtract or
+    # - it is a new day, so we will use yesterdays total to figure it out
     if upload >= uploadprev:
         uploadvalue = upload - uploadprev
     else:
-        uploadvalue = upload
+        if uploadprev == 0:
+            uploadvalue = upload
+        else:
+            uploadvalue = (traffic.get("NewYesterdayUpload") - uploadprev) + upload
     if download >= downloadprev:
         downloadvalue = download - downloadprev
     else:
-        downloadvalue = download
+        if downloadprev == 0:
+            downloadvalue = upload
+        else:
+            downloadvalue = (traffic.get("NewYesterdayDownload") - uploadprev) + upload
 
     # Get the time and add the lines to the log files
     now = datetime.datetime.now()
