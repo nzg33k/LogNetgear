@@ -1,3 +1,5 @@
+import password, time, sys
+
 def getlogdata(password=""):
     from pynetgear import Netgear
     import datetime
@@ -57,8 +59,60 @@ def getlogdata(password=""):
     uploadlog.close()
     downloadlog.close()
 
-# Log forever, every minute
-import password, time
-while True:
+    #send the data to the google sheet for graphing
+    output_to_gsheet([[str(now),downloadvalue,uploadvalue]])
+
+# Output to a google sheet defined in password.py eg
+# {"id": "sheetid goes here", "range": "data!A:C"}
+def output_to_gsheet(data):
+    """Output data to a google sheet"""
+    # https://developers.google.com/sheets/api/quickstart/python
+    from googleapiclient.discovery import build
+    from httplib2 import Http
+    from oauth2client import file as gfile, client, tools
+    # Setup the Sheets API
+    store = gfile.Storage('credentials.json')
+    try:
+        creds = store.get()
+    except:
+        creds = False
+    if not creds or creds.invalid:
+        flow = client.flow_from_clientsecrets(
+            'client_secret.json',
+            'https://www.googleapis.com/auth/spreadsheets'
+        )
+        creds = tools.run_flow(flow, store)
+    service = build('sheets', 'v4', http=creds.authorize(Http()))
+    resource = service.spreadsheets().values()  # pylint: disable=no-member
+    # Populate the destination range
+    result = resource.append(
+        spreadsheetId=password.OUTPUTSHEET['id'],
+        range=password.OUTPUTSHEET['range'],
+        insertDataOption='INSERT_ROWS',
+        valueInputOption="USER_ENTERED",
+        body={
+            "majorDimension": "ROWS",
+            "values": data
+        }
+    )
+    result.execute()
+
+def logforever():
+    # Log forever, every minute
+    while True:
+        getlogdata(password.PASSWORD)
+        time.sleep(60)
+
+def runonce():
     getlogdata(password.PASSWORD)
-    time.sleep(60)
+
+def main(arg = ""):
+    if arg == 'once':
+        runonce()
+    elif arg == 'forever':
+            logforever()
+    else:
+        print "options are once or forever"
+
+if __name__ == "__main__":
+    main(sys.argv)
