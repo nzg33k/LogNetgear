@@ -115,4 +115,4 @@ def main(arg = ""):
         print "options are once or forever"
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main(sys.argv[1])
