@@ -82,20 +82,23 @@ def output_to_gsheet(data):
             'https://www.googleapis.com/auth/spreadsheets'
         )
         creds = tools.run_flow(flow, store)
-    service = build('sheets', 'v4', http=creds.authorize(Http()))
-    resource = service.spreadsheets().values()  # pylint: disable=no-member
-    # Populate the destination range
-    result = resource.append(
-        spreadsheetId=password.OUTPUTSHEET['id'],
-        range=password.OUTPUTSHEET['range'],
-        insertDataOption='INSERT_ROWS',
-        valueInputOption="USER_ENTERED",
-        body={
-            "majorDimension": "ROWS",
-            "values": data
-        }
-    )
-    result.execute()
+    try:
+        service = build('sheets', 'v4', http=creds.authorize(Http()))
+        resource = service.spreadsheets().values()  # pylint: disable=no-member
+        # Populate the destination range
+        result = resource.append(
+            spreadsheetId=password.OUTPUTSHEET['id'],
+            range=password.OUTPUTSHEET['range'],
+            insertDataOption='INSERT_ROWS',
+            valueInputOption="USER_ENTERED",
+            body={
+                "majorDimension": "ROWS",
+                "values": data
+            }
+        )
+        result.execute()
+    except:
+        googlesuccess = False
 
 def logforever():
     # Log forever, every minute
