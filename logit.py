@@ -41,14 +41,18 @@ def getlogdata(password=""):
         if uploadprev == 0:
             uploadvalue = upload
         else:
-            uploadvalue = (traffic.get("NewYesterdayUpload") - uploadprev) + upload
+            uploadvalue = upload
+            #The router doesn't log yesterday right, it seems to be less than prev
+            #uploadvalue = (traffic.get("NewYesterdayUpload") - uploadprev) + upload
     if download >= downloadprev:
         downloadvalue = download - downloadprev
     else:
         if downloadprev == 0:
             downloadvalue = upload
         else:
-            downloadvalue = (traffic.get("NewYesterdayDownload") - uploadprev) + upload
+            downloadvalue = upload
+            #The router doesn't log yesterday right, it seems to be less than prev
+            #downloadvalue = (traffic.get("NewYesterdayDownload") - uploadprev) + upload
 
     # Get the time and add the lines to the log files
     now = datetime.datetime.now()
